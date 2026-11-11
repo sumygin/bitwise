@@ -21,11 +21,11 @@
       XNOR:   { width: 80, height: 48, minInputs: 2, maxInputs: 4, hasOutput: true }
     };
 
-    // Application Workspace State
+    // Application workspace State
     let workspace = {
-      activeCircuitId: null,
+      activecircuitId: null,
       circuits: [],
-      showGrid: false
+      showgrid: false
     };
 
     // Viewport pan & zoom per session
@@ -56,7 +56,7 @@
       quickAddPos: { x: 200, y: 200 }
     };
 
-    // DOM References
+    // DOM references
     const svgEl = document.getElementById('circuit-svg');
     const viewportGroup = document.getElementById('viewport-group');
     const wiresLayer = document.getElementById('wires-layer');
@@ -74,14 +74,14 @@
     /*************************************************************************
      * 1. REFERENCE STARTER CIRCUIT (Exact match to user's attached image!)
      *************************************************************************/
-    function createReferenceCircuit() {
+    function createreferencecircuit() {
       // Matches the attached image:
       // Inputs on left: A, C1, C0, B
       // Output on right: R
       // Top section, middle section, bottom section with exact trunk vertical drops & solder dots
       return {
         id: 'circuit_' + Date.now() + '_ref',
-        name: 'Coursework Diagram 1',
+        name: 'coursework diagram 1',
         nodes: [
           // Left Column Inputs
           { id: 'in_A',  type: 'INPUT',  label: 'A',  x: 65, y: 70,  inputs: 0 },
@@ -171,8 +171,8 @@
     /*************************************************************************
      * 2. ACTIVE CIRCUIT HELPERS & HISTORY (UNDO / REDO)
      *************************************************************************/
-    function getActiveCircuit() {
-      return workspace.circuits.find(c => c.id === workspace.activeCircuitId) || workspace.circuits[0];
+    function getActivecircuit() {
+      return workspace.circuits.find(c => c.id === workspace.activecircuitId) || workspace.circuits[0];
     }
 
     function saveToStorage() {
@@ -188,7 +188,7 @@
     }
 
     function pushUndoState() {
-      const circuit = getActiveCircuit();
+      const circuit = getActivecircuit();
       if (!circuit) return;
       undoStack.push(JSON.stringify({ nodes: circuit.nodes, wires: circuit.wires }));
       if (undoStack.length > 50) undoStack.shift();
@@ -198,7 +198,7 @@
 
     function undo() {
       if (undoStack.length === 0) return;
-      const circuit = getActiveCircuit();
+      const circuit = getActivecircuit();
       redoStack.push(JSON.stringify({ nodes: circuit.nodes, wires: circuit.wires }));
       const prev = JSON.parse(undoStack.pop());
       circuit.nodes = prev.nodes;
@@ -212,7 +212,7 @@
 
     function redo() {
       if (redoStack.length === 0) return;
-      const circuit = getActiveCircuit();
+      const circuit = getActivecircuit();
       undoStack.push(JSON.stringify({ nodes: circuit.nodes, wires: circuit.wires }));
       const next = JSON.parse(redoStack.pop());
       circuit.nodes = next.nodes;
@@ -310,7 +310,7 @@
     }
 
     function showTruthTable() {
-      const circuit = getActiveCircuit();
+      const circuit = getActivecircuit();
       if (!circuit) return;
       try {
         const result = evaluateTruthTable(circuit);
@@ -657,7 +657,7 @@
           Math.max(...Array.from(nodeMap.values()).map(node => node.y)) + 30
         );
 
-        const laneIsClear = (laneY) => !obstacles.some(obstacle =>
+        const laneIsclear = (laneY) => !obstacles.some(obstacle =>
           obstacle.right > midX &&
           obstacle.left < targetChannelX &&
           laneY > obstacle.top &&
@@ -665,7 +665,7 @@
         );
         const clearLanes = laneCandidates
           .filter((laneY, index, lanes) => lanes.indexOf(laneY) === index)
-          .filter(laneIsClear)
+          .filter(laneIsclear)
           .sort((a, b) =>
             (Math.abs(a - p1.y) + Math.abs(a - p2.y)) -
             (Math.abs(b - p1.y) + Math.abs(b - p2.y))
@@ -793,8 +793,8 @@
     /*************************************************************************
      * 5. SMART AUTO-LAYOUT ENGINE ("Auto Arrange")
      *************************************************************************/
-    function autoArrangeCircuit() {
-      const circuit = getActiveCircuit();
+    function autoArrangecircuit() {
+      const circuit = getActivecircuit();
       if (!circuit || circuit.nodes.length === 0) return;
       pushUndoState();
 
@@ -968,7 +968,7 @@
      *************************************************************************/
     function renderAll() {
       renderTabs();
-      const circuit = getActiveCircuit();
+      const circuit = getActivecircuit();
       if (!circuit) return;
 
       const nodeMap = new Map(circuit.nodes.map(n => [n.id, n]));
@@ -1047,7 +1047,7 @@
         ng.setAttribute('transform', `translate(${node.x}, ${node.y})`);
         ng.dataset.nodeId = node.id;
 
-        // Selection halo (hidden during screenshots)
+        // selection halo (hidden during screenshots)
         const halo = document.createElementNS(SVG_NS, 'rect');
         const hw = spec.width + 18;
         const hh = spec.height + 16;
@@ -1142,8 +1142,8 @@
         nodesLayer.appendChild(ng);
       }
 
-      updateSelectionInspector();
-      updateDuplicateButtonLabel();
+      updateselectionInspector();
+      updateduplicateButtonLabel();
     }
 
     /*************************************************************************
@@ -1154,7 +1154,7 @@
       container.innerHTML = '';
 
       for (const c of workspace.circuits) {
-        const isActive = c.id === workspace.activeCircuitId;
+        const isActive = c.id === workspace.activecircuitId;
         const tab = document.createElement('div');
         tab.className = `group flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium cursor-pointer border transition shrink-0 ${
           isActive
@@ -1167,7 +1167,7 @@
         titleSpan.title = 'Double-click to rename circuit tab';
         titleSpan.addEventListener('dblclick', (e) => {
           e.stopPropagation();
-          promptRenameCircuit(c);
+          promptRenamecircuit(c);
         });
         tab.appendChild(titleSpan);
 
@@ -1175,17 +1175,17 @@
           const closeBtn = document.createElement('button');
           closeBtn.className = 'opacity-50 hover:opacity-100 hover:text-red-600 ml-1 text-[11px] leading-none';
           closeBtn.innerHTML = '&times;';
-          closeBtn.title = 'Delete Circuit Tab';
+          closeBtn.title = 'Delete circuit Tab';
           closeBtn.addEventListener('click', (e) => {
             e.stopPropagation();
-            deleteCircuitTab(c.id);
+            deletecircuitTab(c.id);
           });
           tab.appendChild(closeBtn);
         }
 
         tab.addEventListener('click', () => {
-          if (workspace.activeCircuitId !== c.id) {
-            workspace.activeCircuitId = c.id;
+          if (workspace.activecircuitId !== c.id) {
+            workspace.activecircuitId = c.id;
             selectedNodeIds.clear();
             selectedWireIds.clear();
             undoStack = [];
@@ -1201,7 +1201,7 @@
       }
     }
 
-    function promptRenameCircuit(circuit) {
+    function promptRenamecircuit(circuit) {
       const input = document.createElement('input');
       input.type = 'text';
       input.value = circuit.name;
@@ -1228,17 +1228,17 @@
       });
     }
 
-    function updateDuplicateButtonLabel() {
+    function updateduplicateButtonLabel() {
       const lbl = document.getElementById('dup-btn-label');
       if (selectedNodeIds.size > 0) {
-        lbl.textContent = `Duplicate Selection (${selectedNodeIds.size})`;
+        lbl.textContent = `duplicate selection (${selectedNodeIds.size})`;
       } else {
-        lbl.textContent = 'Clone Circuit on Canvas';
+        lbl.textContent = 'clone circuit on canvas';
       }
     }
 
-    function updateSelectionInspector() {
-      const circuit = getActiveCircuit();
+    function updateselectionInspector() {
+      const circuit = getActivecircuit();
       if (!circuit) return;
 
       if (selectedNodeIds.size === 0 && selectedWireIds.size === 0) {
@@ -1335,12 +1335,12 @@
         inspectorEl.appendChild(info);
       }
 
-      // Duplicate & Delete Buttons in Inspector
+      // duplicate & Delete Buttons in Inspector
       if (selectedNodeIds.size > 0) {
         const dupBtn = document.createElement('button');
         dupBtn.className = 'px-2 py-0.5 bg-slate-100 hover:bg-slate-200 text-slate-800 rounded font-medium transition';
-        dupBtn.textContent = 'Duplicate';
-        dupBtn.addEventListener('click', duplicateSelectionOrCircuitOnCanvas);
+        dupBtn.textContent = 'duplicate';
+        dupBtn.addEventListener('click', duplicateselectionOrcircuitonCanvas);
         inspectorEl.appendChild(dupBtn);
       }
 
@@ -1354,7 +1354,7 @@
     // Re-renders SVG without losing focus inside the label text box
     function renderAllWithoutInspectorRebuild() {
       const savedFocus = document.activeElement;
-      const circuit = getActiveCircuit();
+      const circuit = getActivecircuit();
       if (!circuit) return;
       const nodeMap = new Map(circuit.nodes.map(n => [n.id, n]));
       nodesLayer.innerHTML = '';
@@ -1375,7 +1375,7 @@
      * 8. DUPLICATION, ADDING, DELETING NODES & WIRES
      *************************************************************************/
     function getNextDefaultLabel(type) {
-      const circuit = getActiveCircuit();
+      const circuit = getActivecircuit();
       const existing = new Set(circuit.nodes.filter(n => n.type === type).map(n => n.label));
       if (type === 'INPUT') {
         const candidates = ['A', 'B', 'C', 'D', 'C0', 'C1', 'X', 'Y', 'Z', 'S0', 'S1'];
@@ -1403,7 +1403,7 @@
     }
 
     function addNode(type, customWorldPos = null) {
-      const circuit = getActiveCircuit();
+      const circuit = getActivecircuit();
       if (!circuit) return;
       pushUndoState();
 
@@ -1443,11 +1443,11 @@
     }
 
     /**
-     * Duplicates either the currently selected nodes+wires OR (if nothing is selected)
+     * duplicates either the currently selected nodes+wires OR (if nothing is selected)
      * clones the entire current circuit right below on the same canvas!
      */
-    function duplicateSelectionOrCircuitOnCanvas() {
-      const circuit = getActiveCircuit();
+    function duplicateselectionOrcircuitonCanvas() {
+      const circuit = getActivecircuit();
       if (!circuit || circuit.nodes.length === 0) return;
       pushUndoState();
 
@@ -1463,9 +1463,9 @@
         minY = Math.min(minY, n.y);
         maxY = Math.max(maxY, n.y);
       }
-      const isWholeCircuit = selectedNodeIds.size === 0;
-      const offsetX = isWholeCircuit ? 0 : 40;
-      const offsetY = isWholeCircuit ? (maxY - minY) + 120 : 45;
+      const isWholecircuit = selectedNodeIds.size === 0;
+      const offsetX = isWholecircuit ? 0 : 40;
+      const offsetY = isWholecircuit ? (maxY - minY) + 120 : 45;
 
       const idMap = new Map();
       const newNodes = [];
@@ -1481,7 +1481,7 @@
         });
       }
 
-      // Duplicate all wires connecting any two duplicated nodes
+      // duplicate all wires connecting any two duplicated nodes
       const newWires = [];
       for (const w of circuit.wires) {
         if (idMap.has(w.from) && idMap.has(w.to)) {
@@ -1504,14 +1504,14 @@
 
       renderAll();
       saveToStorage();
-      showToast(isWholeCircuit ? 'Cloned entire circuit below on canvas' : `Duplicated ${newNodes.length} component(s)`);
+      showToast(isWholecircuit ? 'cloned entire circuit below on canvas' : `duplicated ${newNodes.length} component(s)`);
     }
 
     /**
-     * Duplicates the entire active circuit into a brand new tab!
+     * duplicates the entire active circuit into a brand new tab!
      */
-    function duplicateCircuitToNewTab() {
-      const current = getActiveCircuit();
+    function duplicatecircuitToNewTab() {
+      const current = getActivecircuit();
       if (!current) return;
 
       const copy = JSON.parse(JSON.stringify(current));
@@ -1519,7 +1519,7 @@
       copy.name = current.name + ' (Copy)';
 
       workspace.circuits.push(copy);
-      workspace.activeCircuitId = copy.id;
+      workspace.activecircuitId = copy.id;
       selectedNodeIds.clear();
       selectedWireIds.clear();
       undoStack = [];
@@ -1530,10 +1530,10 @@
       showToast(`Created duplicate tab "${copy.name}"`);
     }
 
-    function createNewBlankCircuitTab() {
-      const newCircuit = {
+    function createNewBlankcircuitTab() {
+      const newcircuit = {
         id: 'circuit_' + Date.now(),
-        name: `Circuit ${workspace.circuits.length + 1}`,
+        name: `circuit ${workspace.circuits.length + 1}`,
         nodes: [
           { id: 'in_1', type: 'INPUT', label: 'A', x: 140, y: 180, inputs: 0 },
           { id: 'in_2', type: 'INPUT', label: 'B', x: 140, y: 260, inputs: 0 },
@@ -1546,8 +1546,8 @@
           { id: 'w_3', from: 'g_1',  to: 'out_1', toPin: 0, midX: 430 }
         ]
       };
-      workspace.circuits.push(newCircuit);
-      workspace.activeCircuitId = newCircuit.id;
+      workspace.circuits.push(newcircuit);
+      workspace.activecircuitId = newcircuit.id;
       selectedNodeIds.clear();
       selectedWireIds.clear();
       undoStack = [];
@@ -1558,18 +1558,18 @@
       saveToStorage();
     }
 
-    function deleteCircuitTab(id) {
+    function deletecircuitTab(id) {
       if (workspace.circuits.length <= 1) return;
       workspace.circuits = workspace.circuits.filter(c => c.id !== id);
-      if (workspace.activeCircuitId === id) {
-        workspace.activeCircuitId = workspace.circuits[0].id;
+      if (workspace.activecircuitId === id) {
+        workspace.activecircuitId = workspace.circuits[0].id;
       }
       renderAll();
       saveToStorage();
     }
 
     function deleteSelected() {
-      const circuit = getActiveCircuit();
+      const circuit = getActivecircuit();
       if (!circuit) return;
       if (selectedNodeIds.size === 0 && selectedWireIds.size === 0) return;
 
@@ -1585,7 +1585,7 @@
     }
 
     function connectPins(fromNodeId, toNodeId, toPinIndex) {
-      const circuit = getActiveCircuit();
+      const circuit = getActivecircuit();
       if (!circuit || fromNodeId === toNodeId) return;
 
       const fromNode = circuit.nodes.find(n => n.id === fromNodeId);
@@ -1626,7 +1626,7 @@
      *************************************************************************/
     svgEl.addEventListener('mousedown', (e) => {
       quickAddMenu.classList.add('hidden');
-      const circuit = getActiveCircuit();
+      const circuit = getActivecircuit();
       if (!circuit) return;
 
       const worldPt = screenToWorld(e.clientX, e.clientY);
@@ -1739,7 +1739,7 @@
         return;
       }
 
-      // 4. Clicked on empty canvas: clear wire creation & start Marquee Selection box
+      // 4. Clicked on empty canvas: clear wire creation & start Marquee selection box
       interaction.wireSource = null;
       tempWireEl.classList.add('hidden');
       if (!e.shiftKey) {
@@ -1758,7 +1758,7 @@
     });
 
     window.addEventListener('mousemove', (e) => {
-      const circuit = getActiveCircuit();
+      const circuit = getActivecircuit();
       if (!circuit) return;
       const worldPt = screenToWorld(e.clientX, e.clientY);
 
@@ -1830,7 +1830,7 @@
     });
 
     window.addEventListener('mouseup', (e) => {
-      const circuit = getActiveCircuit();
+      const circuit = getActivecircuit();
       const worldPt = screenToWorld(e.clientX, e.clientY);
 
       if (interaction.mode === 'WIRE_CREATE' && interaction.wireSource) {
@@ -1892,7 +1892,7 @@
       return bestPin;
     }
 
-    // Double-click canvas to open Quick Add menu, or double-click node to focus its label input
+    // Double-click canvas to open quick add menu, or double-click node to focus its label input
     svgEl.addEventListener('dblclick', (e) => {
       const nodeEl = e.target.closest('.node-group');
       if (nodeEl) {
@@ -1904,7 +1904,7 @@
         return;
       }
 
-      // Open quick-add popup at cursor
+      // open quick-add popup at cursor
       const rect = canvasContainer.getBoundingClientRect();
       interaction.quickAddPos = screenToWorld(e.clientX, e.clientY);
       quickAddMenu.style.left = `${Math.min(rect.width - 230, e.clientX - rect.left)}px`;
@@ -1934,7 +1934,7 @@
     }
 
     function fitViewToDiagram() {
-      const circuit = getActiveCircuit();
+      const circuit = getActivecircuit();
       if (!circuit || circuit.nodes.length === 0) {
         view = { x: 0, y: 0, scale: 1 };
         renderAll();
@@ -1998,11 +1998,11 @@
       }
       if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'd') {
         e.preventDefault();
-        duplicateSelectionOrCircuitOnCanvas();
+        duplicateselectionOrcircuitonCanvas();
       }
       if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'a') {
         e.preventDefault();
-        const circuit = getActiveCircuit();
+        const circuit = getActivecircuit();
         if (circuit) {
           selectedNodeIds = new Set(circuit.nodes.map(n => n.id));
           renderAll();
@@ -2041,7 +2041,7 @@
      * and downloads it immediately.
      */
     function exportHighResPNG() {
-      const circuit = getActiveCircuit();
+      const circuit = getActivecircuit();
       if (!circuit || circuit.nodes.length === 0) {
         showToast('Canvas is empty');
         return;
@@ -2147,25 +2147,25 @@
         a.href = pngUrl;
         a.download = `${(circuit.name || 'circuit').replace(/\s+/g, '_').toLowerCase()}.png`;
         a.click();
-        showToast('Exported high-resolution PNG');
+        showToast('exported high-resolution PNG');
       };
       img.src = url;
     }
 
-    function saveWorkspaceJSON() {
+    function saveworkspaceJSON() {
       const dataStr = JSON.stringify(workspace, null, 2);
       const blob = new Blob([dataStr], { type: 'application/json' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
-      const circuit = getActiveCircuit();
+      const circuit = getActivecircuit();
       a.href = url;
       a.download = `${(circuit ? circuit.name : 'circuits').replace(/\s+/g, '_').toLowerCase()}.json`;
       a.click();
       URL.revokeObjectURL(url);
-      showToast('Saved circuit file (.json)');
+      showToast('saved circuit file (.json)');
     }
 
-    function openWorkspaceJSON(file) {
+    function openworkspaceJSON(file) {
       const reader = new FileReader();
       reader.onload = (e) => {
         try {
@@ -2181,7 +2181,7 @@
               wires: parsed.wires
             };
             workspace.circuits.push(imported);
-            workspace.activeCircuitId = imported.id;
+            workspace.activecircuitId = imported.id;
           } else {
             showToast('Invalid circuit JSON file');
             return;
@@ -2191,7 +2191,7 @@
           renderAll();
           fitViewToDiagram();
           saveToStorage();
-          showToast('Loaded circuit file successfully');
+          showToast('loaded circuit file successfully');
         } catch (err) {
           showToast('Could not parse JSON file');
         }
@@ -2215,7 +2215,7 @@
       });
     });
 
-    document.getElementById('btn-auto-layout').addEventListener('click', autoArrangeCircuit);
+    document.getElementById('btn-auto-layout').addEventListener('click', autoArrangecircuit);
     document.getElementById('btn-truth-table').addEventListener('click', showTruthTable);
     document.getElementById('btn-close-truth-table').addEventListener('click', () => {
       truthTableDialog.classList.add('hidden');
@@ -2223,9 +2223,9 @@
     truthTableDialog.addEventListener('click', (event) => {
       if (event.target === truthTableDialog) truthTableDialog.classList.add('hidden');
     });
-    document.getElementById('btn-clone-selection').addEventListener('click', duplicateSelectionOrCircuitOnCanvas);
-    document.getElementById('btn-dup-tab').addEventListener('click', duplicateCircuitToNewTab);
-    document.getElementById('btn-new-tab').addEventListener('click', createNewBlankCircuitTab);
+    document.getElementById('btn-clone-selection').addEventListener('click', duplicateselectionOrcircuitonCanvas);
+    document.getElementById('btn-dup-tab').addEventListener('click', duplicatecircuitToNewTab);
+    document.getElementById('btn-new-tab').addEventListener('click', createNewBlankcircuitTab);
 
     document.getElementById('btn-undo').addEventListener('click', undo);
     document.getElementById('btn-redo').addEventListener('click', redo);
@@ -2233,14 +2233,14 @@
     document.getElementById('btn-toggle-grid').addEventListener('click', (e) => {
       workspace.showGrid = !workspace.showGrid;
       canvasContainer.classList.toggle('canvas-grid', workspace.showGrid);
-      e.currentTarget.textContent = `Grid: ${workspace.showGrid ? 'On' : 'Off'}`;
+      e.currentTarget.textContent = `grid: ${workspace.showGrid ? 'on' : 'off'}`;
       saveToStorage();
     });
 
     document.getElementById('btn-fit-view').addEventListener('click', fitViewToDiagram);
 
     document.getElementById('btn-clear').addEventListener('click', () => {
-      const circuit = getActiveCircuit();
+      const circuit = getActivecircuit();
       if (!circuit || circuit.nodes.length === 0) return;
       pushUndoState();
       circuit.nodes = [];
@@ -2249,32 +2249,32 @@
       selectedWireIds.clear();
       renderAll();
       saveToStorage();
-      showToast('Cleared canvas (Press Ctrl+Z to undo)');
+      showToast('cleared canvas (Press Ctrl+Z to undo)');
     });
 
     document.getElementById('btn-load-ref').addEventListener('click', () => {
-      const ref = createReferenceCircuit();
+      const ref = createreferencecircuit();
       workspace.circuits.push(ref);
-      workspace.activeCircuitId = ref.id;
+      workspace.activecircuitId = ref.id;
       selectedNodeIds.clear();
       selectedWireIds.clear();
       renderAll();
       fitViewToDiagram();
       saveToStorage();
-      showToast('Loaded reference coursework diagram');
+      showToast('loaded reference coursework diagram');
     });
 
     document.getElementById('btn-screenshot-mode').addEventListener('click', () => toggleScreenshotMode(true));
     document.getElementById('btn-exit-screenshot').addEventListener('click', () => toggleScreenshotMode(false));
     document.getElementById('btn-export-png').addEventListener('click', exportHighResPNG);
 
-    document.getElementById('btn-save-json').addEventListener('click', saveWorkspaceJSON);
+    document.getElementById('btn-save-json').addEventListener('click', saveworkspaceJSON);
     document.getElementById('btn-open-json').addEventListener('click', () => {
       document.getElementById('file-input-json').click();
     });
     document.getElementById('file-input-json').addEventListener('change', (e) => {
       if (e.target.files && e.target.files[0]) {
-        openWorkspaceJSON(e.target.files[0]);
+        openworkspaceJSON(e.target.files[0]);
         e.target.value = '';
       }
     });
@@ -2309,16 +2309,16 @@
       }
 
       if (!loaded) {
-        const refCircuit = createReferenceCircuit();
-        workspace.circuits = [refCircuit];
-        workspace.activeCircuitId = refCircuit.id;
+        const refcircuit = createreferencecircuit();
+        workspace.circuits = [refcircuit];
+        workspace.activecircuitId = refcircuit.id;
       }
 
       // Persist the initial workspace too, so the first circuit and any
       // recovered workspace are available after the next browser refresh.
       saveToStorage();
       canvasContainer.classList.toggle('canvas-grid', !!workspace.showGrid);
-      document.getElementById('btn-toggle-grid').textContent = `Grid: ${workspace.showGrid ? 'On' : 'Off'}`;
+      document.getElementById('btn-toggle-grid').textContent = `grid: ${workspace.showGrid ? 'on' : 'off'}`;
 
       updateUndoRedoButtons();
       renderAll();

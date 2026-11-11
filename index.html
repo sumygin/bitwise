@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Bitwise — Logic Circuit Workspace</title>
+  <title>bitwise — logic circuit workspace</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -14,17 +14,13 @@
 
   <!-- TOP HEADER & CIRCUIT TABS (Hidden in Screenshot Mode) -->
   <header class="ui-chrome flex flex-col border-b border-slate-200 bg-slate-50/90 backdrop-blur-sm z-20 shrink-0">
-    <!-- Top Row: Brand, Circuit Tabs, File & Export Actions -->
+    <!-- Top Row: Brand, circuit Tabs, File & Export Actions -->
     <div class="flex items-center justify-between px-3 py-1.5 border-b border-slate-200/80 gap-2">
-      <!-- Brand + Circuit Tabs -->
+      <!-- Brand + circuit Tabs -->
       <div class="flex items-center gap-2 min-w-0 flex-1">
         <div class="bitwise-brand flex items-center gap-2.5 pr-3 shrink-0">
           <div class="bitwise-mark" aria-hidden="true">
-            <svg viewBox="0 0 42 28" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M4 3C10 3 19 5 27 14C19 23 10 25 4 25C8 18 8 10 4 3Z" fill="currentColor"/>
-              <path d="M1.5 3C6.5 10 6.5 18 1.5 25" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
-              <path d="M27 14H40" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
-            </svg>
+            
           </div>
           <div class="hidden sm:block">
             <span class="bitwise-wordmark">bitwise</span>
@@ -32,158 +28,158 @@
           </div>
         </div>
 
-        <!-- Multi-Circuit Tabs -->
+        <!-- Multi-circuit Tabs -->
         <div id="circuit-tabs" class="flex items-center gap-1 overflow-x-auto no-scrollbar py-0.5">
           <!-- Populated dynamically -->
         </div>
 
-        <button id="btn-new-tab" title="Create New Blank Circuit Tab"
+        <button id="btn-new-tab" title="Create New Blank circuit Tab"
           class="shrink-0 px-2 py-1 text-xs font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-200/70 rounded-md flex items-center gap-1 transition">
-          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
-          <span>New Tab</span>
+          
+          <span>new tab</span>
         </button>
 
-        <button id="btn-dup-tab" title="Duplicate Entire Current Circuit into a New Tab"
+        <button id="btn-dup-tab" title="duplicate entire Current circuit into a new tab"
           class="shrink-0 px-2.5 py-1 text-xs font-medium text-indigo-700 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 rounded-md flex items-center gap-1 transition">
-          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
-          <span>Duplicate Circuit Tab</span>
+          
+          <span>duplicate circuit tab</span>
         </button>
       </div>
 
       <!-- Right File / Export Controls -->
       <div class="flex items-center gap-1.5 shrink-0">
-        <button id="btn-load-ref" title="Load Reference Coursework Circuit"
+        <button id="btn-load-ref" title="Load reference Coursework circuit"
           class="px-2.5 py-1 text-xs font-medium text-slate-700 bg-white hover:bg-slate-100 border border-slate-200 rounded-md transition hidden md:inline-flex items-center gap-1">
-          <svg class="w-3.5 h-3.5 text-slate-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
-          Reset Reference
+          
+          reset reference
         </button>
 
-        <button id="btn-open-json" title="Open Circuit File (.json)"
+        <button id="btn-open-json" title="open circuit File (.json)"
           class="px-2.5 py-1 text-xs font-medium text-slate-700 bg-white hover:bg-slate-100 border border-slate-200 rounded-md flex items-center gap-1 transition">
-          <svg class="w-3.5 h-3.5 text-slate-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 19a2 2 0 01-2-2V7a2 2 0 012-2h4l2 2h4a2 2 0 012 2v1M5 19h14a2 2 0 002-2v-5a2 2 0 00-2-2H9a2 2 0 00-2 2v5a2 2 0 01-2 2z"/></svg>
-          <span>Open</span>
+          
+          <span>open</span>
         </button>
         <input type="file" id="file-input-json" accept=".json,application/json" class="hidden" />
 
-        <button id="btn-save-json" title="Save Workspace (.json)"
+        <button id="btn-save-json" title="save workspace (.json)"
           class="px-2.5 py-1 text-xs font-medium text-slate-700 bg-white hover:bg-slate-100 border border-slate-200 rounded-md flex items-center gap-1 transition">
-          <svg class="w-3.5 h-3.5 text-slate-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"/></svg>
-          <span>Save</span>
+          
+          <span>save</span>
         </button>
 
         <div class="h-4 w-px bg-slate-200 mx-0.5"></div>
 
-        <button id="btn-screenshot-mode" title="Enter Pure White Screenshot View (Press Esc to exit)"
+        <button id="btn-screenshot-mode" title="Enter Pure White screenshot view (Press Esc to exit)"
           class="px-2.5 py-1 text-xs font-medium text-emerald-800 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 rounded-md flex items-center gap-1 transition">
-          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-          <span>Screenshot View</span>
+          
+          <span>screenshot view</span>
         </button>
 
         <button id="btn-export-png" title="Download Crisp High-Res PNG on White Background"
           class="px-3 py-1 text-xs font-semibold text-white bg-slate-900 hover:bg-slate-800 rounded-md flex items-center gap-1 shadow-sm transition">
-          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
-          <span>Export PNG</span>
+          
+          <span>export png</span>
         </button>
       </div>
     </div>
 
-    <!-- Second Row: Component Toolbar & Layout Tools -->
+    <!-- Second Row: component Toolbar & Layout Tools -->
     <div class="flex items-center justify-between px-3 py-1.5 bg-white gap-2 flex-wrap">
       <!-- Add Nodes Palette -->
       <div class="flex items-center gap-1 flex-wrap">
-        <span class="text-[11px] font-semibold uppercase tracking-wider text-slate-400 mr-1">Add:</span>
+        <span class="text-[11px] font-semibold uppercase tracking-wider text-slate-400 mr-1">add:</span>
 
         <button data-add-type="INPUT" class="add-node-btn px-2.5 py-1 text-xs font-medium bg-slate-50 hover:bg-slate-100 text-slate-800 border border-slate-200 rounded-md flex items-center gap-1.5 transition shadow-2xs" title="Add Input Terminal (A, B, C...)">
           <span class="font-serif font-bold text-sm leading-none">A</span>
-          <span>Input</span>
+          <span>input</span>
         </button>
 
         <button data-add-type="OUTPUT" class="add-node-btn px-2.5 py-1 text-xs font-medium bg-slate-50 hover:bg-slate-100 text-slate-800 border border-slate-200 rounded-md flex items-center gap-1.5 transition shadow-2xs" title="Add Output Terminal (R, Q, Y...)">
           <span class="font-serif font-bold text-sm leading-none">R</span>
-          <span>Output</span>
+          <span>output</span>
         </button>
 
         <div class="h-4 w-px bg-slate-200 mx-1"></div>
 
         <!-- Gate Buttons with Mini Inline SVG Icons -->
-        <button data-add-type="NOT" class="add-node-btn px-2 py-1 text-xs font-medium bg-white hover:bg-slate-100 text-slate-800 border border-slate-200 rounded-md flex items-center gap-1.5 transition" title="Add NOT Gate (Inverter)">
-          <svg class="w-5 h-3.5" viewBox="0 0 36 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="4,3 4,21 24,12" fill="white"/><circle cx="27.5" cy="12" r="3" fill="white"/></svg>
-          <span>NOT</span>
+        <button data-add-type="NOT" class="add-node-btn px-2 py-1 text-xs font-medium bg-white hover:bg-slate-100 text-slate-800 border border-slate-200 rounded-md flex items-center gap-1.5 transition" title="Add not gate (Inverter)">
+          
+          <span>not</span>
         </button>
 
-        <button data-add-type="AND" class="add-node-btn px-2 py-1 text-xs font-medium bg-white hover:bg-slate-100 text-slate-800 border border-slate-200 rounded-md flex items-center gap-1.5 transition" title="Add AND Gate">
-          <svg class="w-5 h-3.5" viewBox="0 0 36 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5,3 L18,3 A9,9 0 0,1 18,21 L5,21 Z" fill="white"/></svg>
-          <span>AND</span>
+        <button data-add-type="AND" class="add-node-btn px-2 py-1 text-xs font-medium bg-white hover:bg-slate-100 text-slate-800 border border-slate-200 rounded-md flex items-center gap-1.5 transition" title="Add and gate">
+          
+          <span>and</span>
         </button>
 
-        <button data-add-type="OR" class="add-node-btn px-2 py-1 text-xs font-medium bg-white hover:bg-slate-100 text-slate-800 border border-slate-200 rounded-md flex items-center gap-1.5 transition" title="Add OR Gate">
-          <svg class="w-5 h-3.5" viewBox="0 0 36 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4,3 C13,3 22,5 29,12 C22,19 13,21 4,21 C8,15 8,9 4,3 Z" fill="white"/></svg>
-          <span>OR</span>
+        <button data-add-type="OR" class="add-node-btn px-2 py-1 text-xs font-medium bg-white hover:bg-slate-100 text-slate-800 border border-slate-200 rounded-md flex items-center gap-1.5 transition" title="Add or gate">
+          
+          <span>or</span>
         </button>
 
-        <button data-add-type="NAND" class="add-node-btn px-2 py-1 text-xs font-medium bg-white hover:bg-slate-100 text-slate-800 border border-slate-200 rounded-md flex items-center gap-1.5 transition" title="Add NAND Gate">
-          <svg class="w-5 h-3.5" viewBox="0 0 38 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4,3 L16,3 A9,9 0 0,1 16,21 L4,21 Z" fill="white"/><circle cx="28.5" cy="12" r="3" fill="white"/></svg>
-          <span>NAND</span>
+        <button data-add-type="NAND" class="add-node-btn px-2 py-1 text-xs font-medium bg-white hover:bg-slate-100 text-slate-800 border border-slate-200 rounded-md flex items-center gap-1.5 transition" title="Add nand gate">
+          
+          <span>nand</span>
         </button>
 
-        <button data-add-type="NOR" class="add-node-btn px-2 py-1 text-xs font-medium bg-white hover:bg-slate-100 text-slate-800 border border-slate-200 rounded-md flex items-center gap-1.5 transition" title="Add NOR Gate">
-          <svg class="w-5 h-3.5" viewBox="0 0 38 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3,3 C12,3 20,5 26,12 C20,19 12,21 3,21 C7,15 7,9 3,3 Z" fill="white"/><circle cx="29.5" cy="12" r="3" fill="white"/></svg>
-          <span>NOR</span>
+        <button data-add-type="NOR" class="add-node-btn px-2 py-1 text-xs font-medium bg-white hover:bg-slate-100 text-slate-800 border border-slate-200 rounded-md flex items-center gap-1.5 transition" title="Add nor gate">
+          
+          <span>nor</span>
         </button>
 
-        <button data-add-type="XOR" class="add-node-btn px-2 py-1 text-xs font-medium bg-white hover:bg-slate-100 text-slate-800 border border-slate-200 rounded-md flex items-center gap-1.5 transition" title="Add XOR Gate">
-          <svg class="w-5 h-3.5" viewBox="0 0 38 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2,3 C6,9 6,15 2,21" fill="none"/><path d="M6,3 C15,3 24,5 31,12 C24,19 15,21 6,21 C10,15 10,9 6,3 Z" fill="white"/></svg>
-          <span>XOR</span>
+        <button data-add-type="XOR" class="add-node-btn px-2 py-1 text-xs font-medium bg-white hover:bg-slate-100 text-slate-800 border border-slate-200 rounded-md flex items-center gap-1.5 transition" title="Add xor gate">
+          
+          <span>xor</span>
         </button>
 
-        <button data-add-type="XNOR" class="add-node-btn px-2 py-1 text-xs font-medium bg-white hover:bg-slate-100 text-slate-800 border border-slate-200 rounded-md flex items-center gap-1.5 transition" title="Add XNOR Gate">
-          <svg class="w-5 h-3.5" viewBox="0 0 40 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2,3 C6,9 6,15 2,21" fill="none"/><path d="M6,3 C14,3 22,5 28,12 C22,19 14,21 6,21 C10,15 10,9 6,3 Z" fill="white"/><circle cx="31.5" cy="12" r="3" fill="white"/></svg>
-          <span>XNOR</span>
+        <button data-add-type="XNOR" class="add-node-btn px-2 py-1 text-xs font-medium bg-white hover:bg-slate-100 text-slate-800 border border-slate-200 rounded-md flex items-center gap-1.5 transition" title="Add Xnor gate">
+          
+          <span>xnor</span>
         </button>
       </div>
 
-      <!-- Layout, Duplicate, Undo/Redo, Grid Controls -->
+      <!-- Layout, duplicate, Undo/Redo, Grid Controls -->
       <div class="flex items-center gap-1.5">
         <button id="btn-auto-layout" title="Clean up the circuit with horizontal-first wiring"
           class="px-2.5 py-1 text-xs font-semibold text-blue-700 bg-blue-50 hover:bg-blue-100 border border-blue-200 rounded-md flex items-center gap-1 transition shadow-2xs">
-          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 7h16M4 12h10m-10 5h16"/><path stroke-linecap="round" d="M17 10v4m-2-2h4"/></svg>
-          <span>Clean Circuit</span>
+          
+          <span>clean circuit</span>
         </button>
 
         <button id="btn-truth-table" title="Generate a truth table for the current circuit"
           class="px-2.5 py-1 text-xs font-semibold text-violet-700 bg-violet-50 hover:bg-violet-100 border border-violet-200 rounded-md flex items-center gap-1 transition shadow-2xs">
-          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 5h16M4 10h16M4 15h16M4 20h16M9 5v15M16 5v15"/></svg>
-          <span>Truth Table</span>
+          
+          <span>truth table</span>
         </button>
 
-        <button id="btn-clone-selection" title="Duplicate Selected Nodes (or Entire Circuit onto Canvas if nothing selected) [Ctrl+D]"
+        <button id="btn-clone-selection" title="duplicate Selected Nodes (or entire circuit onto Canvas if nothing selected) [Ctrl+D]"
           class="px-2.5 py-1 text-xs font-medium text-slate-700 bg-white hover:bg-slate-100 border border-slate-200 rounded-md flex items-center gap-1 transition">
-          <svg class="w-3.5 h-3.5 text-slate-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2"/></svg>
-          <span id="dup-btn-label">Duplicate Circuit Here</span>
+          
+          <span id="dup-btn-label">duplicate circuit here</span>
         </button>
 
         <div class="h-4 w-px bg-slate-200 mx-0.5"></div>
 
         <button id="btn-undo" title="Undo (Ctrl+Z)" class="p-1 text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded border border-transparent hover:border-slate-200 disabled:opacity-30 transition">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"/></svg>
+          
         </button>
         <button id="btn-redo" title="Redo (Ctrl+Y)" class="p-1 text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded border border-transparent hover:border-slate-200 disabled:opacity-30 transition">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 10h-10a8 8 0 00-8 8v2M21 10l-6 6m6-6l-6-6"/></svg>
+          
         </button>
 
         <button id="btn-toggle-grid" title="Toggle Subtle Snap Grid (Hidden on Screenshots)"
           class="px-2 py-1 text-xs font-medium text-slate-600 bg-white hover:bg-slate-100 border border-slate-200 rounded-md transition">
-          Grid: Off
+          grid: off
         </button>
 
-        <button id="btn-fit-view" title="Center & Fit Diagram"
+        <button id="btn-fit-view" title="center & Fit Diagram"
           class="px-2 py-1 text-xs font-medium text-slate-600 bg-white hover:bg-slate-100 border border-slate-200 rounded-md transition">
-          Center
+          center
         </button>
 
-        <button id="btn-clear" title="Clear Canvas"
+        <button id="btn-clear" title="clear Canvas"
           class="px-2 py-1 text-xs font-medium text-red-600 hover:bg-red-50 border border-transparent hover:border-red-200 rounded-md transition">
-          Clear
+          clear
         </button>
       </div>
     </div>
@@ -192,58 +188,58 @@
   <!-- MAIN WORKSPACE AREA -->
   <div class="relative flex-1 w-full h-full overflow-hidden bg-white" id="canvas-container">
 
-    <!-- Floating Selection Inspector Bar (Appears when 1+ nodes or wires are selected) -->
+    <!-- Floating selection Inspector Bar (Appears when 1+ nodes or wires are selected) -->
     <div id="selection-inspector" class="ui-chrome hidden absolute top-3 left-1/2 -translate-x-1/2 z-20 bg-white/95 backdrop-blur border border-slate-200/90 shadow-lg rounded-xl px-3 py-1.5 flex items-center gap-2.5 text-xs">
       <!-- Dynamic content populated based on selection -->
     </div>
 
-    <!-- Truth Table Dialog -->
+    <!-- truth table Dialog -->
     <div id="truth-table-dialog" class="ui-chrome hidden fixed inset-0 z-40 bg-slate-900/30 backdrop-blur-[2px] flex items-center justify-center p-4">
       <div class="w-full max-w-4xl max-h-[85vh] overflow-hidden bg-white rounded-2xl border border-slate-200 shadow-2xl flex flex-col">
         <div class="flex items-center justify-between px-5 py-3 border-b border-slate-200 shrink-0">
           <div>
-            <h2 class="text-base font-semibold text-slate-900">Truth Table</h2>
+            <h2 class="text-base font-semibold text-slate-900">truth table</h2>
             <p id="truth-table-subtitle" class="text-xs text-slate-500 mt-0.5"></p>
           </div>
           <button id="btn-close-truth-table" class="p-1.5 text-slate-500 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition" title="Close truth table">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 6l12 12M18 6L6 18"/></svg>
+            
           </button>
         </div>
         <div id="truth-table-content" class="overflow-auto p-5"></div>
       </div>
     </div>
 
-    <!-- Floating Exit Screenshot Mode Pill (Only visible in Screenshot Mode) -->
+    <!-- Floating Exit Screenshot Mode Pill (only visible in Screenshot Mode) -->
     <div id="screenshot-exit-bar" class="hidden fixed top-3 right-3 z-50 transition-opacity duration-300 opacity-80 hover:opacity-100">
       <div class="bg-slate-900/90 text-white text-xs px-3 py-1.5 rounded-full shadow-lg flex items-center gap-2">
-        <span>Pure White Screenshot Mode</span>
+        <span>pure white screenshot mode</span>
         <button id="btn-exit-screenshot" class="bg-white text-slate-900 font-semibold px-2 py-0.5 rounded-full hover:bg-slate-100 transition">
-          Exit (Esc)
+          exit (esc)
         </button>
       </div>
     </div>
 
-    <!-- Double-Click Quick Add Popup Menu -->
+    <!-- Double-Click quick add Popup Menu -->
     <div id="quick-add-menu" class="ui-chrome hidden absolute z-30 bg-white border border-slate-200 shadow-xl rounded-xl p-2 w-56">
-      <div class="text-[10px] font-semibold uppercase tracking-wider text-slate-400 px-2 py-1">Quick Insert at Cursor</div>
+      <div class="text-[10px] font-semibold uppercase tracking-wider text-slate-400 px-2 py-1">quick insert at cursor</div>
       <div class="grid grid-cols-2 gap-1 mt-1">
         <button data-quick-type="INPUT" class="quick-btn px-2 py-1.5 text-xs text-left rounded-lg hover:bg-slate-100 font-medium flex items-center gap-1.5"><span class="font-serif font-bold">A</span> Input</button>
         <button data-quick-type="OUTPUT" class="quick-btn px-2 py-1.5 text-xs text-left rounded-lg hover:bg-slate-100 font-medium flex items-center gap-1.5"><span class="font-serif font-bold">R</span> Output</button>
-        <button data-quick-type="NOT" class="quick-btn px-2 py-1.5 text-xs text-left rounded-lg hover:bg-slate-100 font-medium">NOT Gate</button>
-        <button data-quick-type="AND" class="quick-btn px-2 py-1.5 text-xs text-left rounded-lg hover:bg-slate-100 font-medium">AND Gate</button>
-        <button data-quick-type="OR" class="quick-btn px-2 py-1.5 text-xs text-left rounded-lg hover:bg-slate-100 font-medium">OR Gate</button>
-        <button data-quick-type="NAND" class="quick-btn px-2 py-1.5 text-xs text-left rounded-lg hover:bg-slate-100 font-medium">NAND Gate</button>
-        <button data-quick-type="NOR" class="quick-btn px-2 py-1.5 text-xs text-left rounded-lg hover:bg-slate-100 font-medium">NOR Gate</button>
-        <button data-quick-type="XOR" class="quick-btn px-2 py-1.5 text-xs text-left rounded-lg hover:bg-slate-100 font-medium">XOR Gate</button>
+        <button data-quick-type="NOT" class="quick-btn px-2 py-1.5 text-xs text-left rounded-lg hover:bg-slate-100 font-medium">not gate</button>
+        <button data-quick-type="AND" class="quick-btn px-2 py-1.5 text-xs text-left rounded-lg hover:bg-slate-100 font-medium">and gate</button>
+        <button data-quick-type="OR" class="quick-btn px-2 py-1.5 text-xs text-left rounded-lg hover:bg-slate-100 font-medium">or gate</button>
+        <button data-quick-type="NAND" class="quick-btn px-2 py-1.5 text-xs text-left rounded-lg hover:bg-slate-100 font-medium">nand gate</button>
+        <button data-quick-type="NOR" class="quick-btn px-2 py-1.5 text-xs text-left rounded-lg hover:bg-slate-100 font-medium">nor gate</button>
+        <button data-quick-type="XOR" class="quick-btn px-2 py-1.5 text-xs text-left rounded-lg hover:bg-slate-100 font-medium">xor gate</button>
       </div>
     </div>
 
-    <!-- SVG Circuit Canvas -->
+    <!-- SVG circuit Canvas -->
     <svg id="circuit-svg" class="w-full h-full block cursor-default" xmlns="http://www.w3.org/2000/svg">
       <!-- Pure White Background Rect so exports always have #ffffff -->
       <rect id="svg-bg-rect" width="100%" height="100%" fill="#ffffff" />
 
-      <!-- Main Pan/Zoom Viewport Group -->
+      <!-- Main pan/zoom Viewport Group -->
       <g id="viewport-group">
         <!-- Layer 1: Wires -->
         <g id="wires-layer"></g>
@@ -253,7 +249,7 @@
         <path id="temp-wire" class="hidden pointer-events-none" fill="none" stroke="#2563eb" stroke-width="2" stroke-dasharray="5,4" />
         <!-- Layer 4: Gates, Inputs, Outputs -->
         <g id="nodes-layer"></g>
-        <!-- Layer 5: Marquee Selection Box -->
+        <!-- Layer 5: Marquee selection Box -->
         <rect id="marquee-box" class="hidden pointer-events-none" fill="rgba(37, 99, 235, 0.08)" stroke="#2563eb" stroke-width="1" stroke-dasharray="4,3" />
       </g>
     </svg>
@@ -261,13 +257,13 @@
     <!-- Bottom Helper Status Bar (Hidden in Screenshot Mode) -->
     <div class="ui-chrome absolute bottom-3 left-3 right-3 pointer-events-none flex items-center justify-between text-xs text-slate-500">
       <div class="bg-white/90 backdrop-blur border border-slate-200 px-3 py-1.5 rounded-lg shadow-xs pointer-events-auto flex items-center gap-3 flex-wrap">
-        <span><strong class="text-slate-700">Wire:</strong> Drag from output pin (right) to input pin or gate body</span>
+        <span><strong class="text-slate-700">wire:</strong> drag from output pin (right) to input pin or gate body</span>
         <span class="hidden sm:inline">•</span>
-        <span class="hidden sm:inline"><strong class="text-slate-700">Adjust Wire Bend:</strong> Drag any vertical wire segment left/right</span>
+        <span class="hidden sm:inline"><strong class="text-slate-700">adjust wire bend:</strong> drag any vertical wire segment left/right</span>
         <span class="hidden md:inline">•</span>
-        <span class="hidden md:inline"><strong class="text-slate-700">Pan/Zoom:</strong> Middle-drag or Space+Drag / Scroll wheel</span>
+        <span class="hidden md:inline"><strong class="text-slate-700">pan/zoom:</strong> middle-drag or space+drag / scroll wheel</span>
         <span class="hidden lg:inline">•</span>
-        <span class="hidden lg:inline"><strong class="text-slate-700">Quick Add:</strong> Double-click empty canvas</span>
+        <span class="hidden lg:inline"><strong class="text-slate-700">quick add:</strong> double-click empty canvas</span>
       </div>
 
       <div class="bg-white/90 backdrop-blur border border-slate-200 px-2.5 py-1 rounded-lg shadow-xs pointer-events-auto flex items-center gap-2">
@@ -279,7 +275,7 @@
 
     <!-- Toast Notification -->
     <div id="toast" class="ui-chrome fixed bottom-14 left-1/2 -translate-x-1/2 z-50 pointer-events-none opacity-0 transition-opacity duration-200 bg-slate-900 text-white text-xs font-medium px-3.5 py-2 rounded-lg shadow-lg">
-      Action completed
+      action completed
     </div>
   </div>
 
