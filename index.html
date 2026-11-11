@@ -4,6 +4,8 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>bitwise — logic circuit workspace</title>
+  <meta name="description" content="a simple browser-based logic circuit workspace" />
+  <meta name="theme-color" content="#ffffff" />
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -90,12 +92,12 @@
         <span class="text-[11px] font-semibold uppercase tracking-wider text-slate-400 mr-1">add:</span>
 
         <button data-add-type="INPUT" class="add-node-btn px-2.5 py-1 text-xs font-medium bg-slate-50 hover:bg-slate-100 text-slate-800 border border-slate-200 rounded-md flex items-center gap-1.5 transition shadow-2xs" title="Add Input Terminal (A, B, C...)">
-          <span class="font-serif font-bold text-sm leading-none">A</span>
+          <span class="font-serif font-bold text-sm leading-none">a</span>
           <span>input</span>
         </button>
 
         <button data-add-type="OUTPUT" class="add-node-btn px-2.5 py-1 text-xs font-medium bg-slate-50 hover:bg-slate-100 text-slate-800 border border-slate-200 rounded-md flex items-center gap-1.5 transition shadow-2xs" title="Add Output Terminal (R, Q, Y...)">
-          <span class="font-serif font-bold text-sm leading-none">R</span>
+          <span class="font-serif font-bold text-sm leading-none">r</span>
           <span>output</span>
         </button>
 
@@ -223,8 +225,8 @@
     <div id="quick-add-menu" class="ui-chrome hidden absolute z-30 bg-white border border-slate-200 shadow-xl rounded-xl p-2 w-56">
       <div class="text-[10px] font-semibold uppercase tracking-wider text-slate-400 px-2 py-1">quick insert at cursor</div>
       <div class="grid grid-cols-2 gap-1 mt-1">
-        <button data-quick-type="INPUT" class="quick-btn px-2 py-1.5 text-xs text-left rounded-lg hover:bg-slate-100 font-medium flex items-center gap-1.5"><span class="font-serif font-bold">A</span> Input</button>
-        <button data-quick-type="OUTPUT" class="quick-btn px-2 py-1.5 text-xs text-left rounded-lg hover:bg-slate-100 font-medium flex items-center gap-1.5"><span class="font-serif font-bold">R</span> Output</button>
+        <button data-quick-type="INPUT" class="quick-btn px-2 py-1.5 text-xs text-left rounded-lg hover:bg-slate-100 font-medium flex items-center gap-1.5"><span class="font-serif font-bold">a</span> input</button>
+        <button data-quick-type="OUTPUT" class="quick-btn px-2 py-1.5 text-xs text-left rounded-lg hover:bg-slate-100 font-medium flex items-center gap-1.5"><span class="font-serif font-bold">r</span> output</button>
         <button data-quick-type="NOT" class="quick-btn px-2 py-1.5 text-xs text-left rounded-lg hover:bg-slate-100 font-medium">not gate</button>
         <button data-quick-type="AND" class="quick-btn px-2 py-1.5 text-xs text-left rounded-lg hover:bg-slate-100 font-medium">and gate</button>
         <button data-quick-type="OR" class="quick-btn px-2 py-1.5 text-xs text-left rounded-lg hover:bg-slate-100 font-medium">or gate</button>
