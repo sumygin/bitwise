@@ -84,10 +84,10 @@
         name: 'coursework diagram 1',
         nodes: [
           // Left Column Inputs
-          { id: 'in_A',  type: 'INPUT',  label: 'a',  x: 65, y: 70,  inputs: 0 },
-          { id: 'in_C1', type: 'INPUT',  label: 'c1', x: 65, y: 120, inputs: 0 },
-          { id: 'in_C0', type: 'INPUT',  label: 'c0', x: 65, y: 165, inputs: 0 },
-          { id: 'in_B',  type: 'INPUT',  label: 'b',  x: 65, y: 350, inputs: 0 },
+          { id: 'in_A',  type: 'INPUT',  label: 'A',  x: 65, y: 70,  inputs: 0 },
+          { id: 'in_C1', type: 'INPUT',  label: 'C1', x: 65, y: 120, inputs: 0 },
+          { id: 'in_C0', type: 'INPUT',  label: 'C0', x: 65, y: 165, inputs: 0 },
+          { id: 'in_B',  type: 'INPUT',  label: 'B',  x: 65, y: 350, inputs: 0 },
 
           // NOT Gates for A, C0, B, and C1
           { id: 'not_A',  type: 'NOT', label: '', x: 215, y: 70,  inputs: 1 },
@@ -113,7 +113,7 @@
 
           // Final Output OR Gate & Output R
           { id: 'or_final', type: 'OR',     label: '',  x: 960, y: 115, inputs: 2 },
-          { id: 'out_R',    type: 'OUTPUT', label: 'r', x: 1090, y: 115, inputs: 1 }
+          { id: 'out_R',    type: 'OUTPUT', label: 'R', x: 1090, y: 115, inputs: 1 }
         ],
         wires: [
           // Input A wires (trunk at x=125)
@@ -251,7 +251,7 @@
       if (!inputs.length || !outputs.length) throw new Error('Add at least one input and one output terminal first.');
 
       const makeHeaders = (nodes, prefix, used) => nodes.map((node, index) => {
-        const base = (node.label || `${prefix}${index + 1}`).trim() || `${prefix}${index + 1}`;
+        const base = ((node.label || `${prefix}${index + 1}`).trim() || `${prefix}${index + 1}`).toUpperCase();
         const count = (used.get(base) || 0) + 1;
         used.set(base, count);
         return count === 1 ? base : `${base}${count}`;
@@ -414,7 +414,7 @@
         text.setAttribute('font-family', "'Newsreader', 'Times New Roman', Georgia, serif");
         text.setAttribute('font-size', '22');
         text.setAttribute('fill', '#000000');
-        text.textContent = node.label || 'a';
+        text.textContent = (node.label || 'A').toUpperCase();
         g.appendChild(text);
 
         const stub = document.createElementNS(SVG_NS, 'line');
@@ -446,7 +446,7 @@
         text.setAttribute('font-family', "'Newsreader', 'Times New Roman', Georgia, serif");
         text.setAttribute('font-size', '22');
         text.setAttribute('fill', '#000000');
-        text.textContent = node.label || 'r';
+        text.textContent = (node.label || 'R').toUpperCase();
         g.appendChild(text);
         return g;
       }
@@ -1267,11 +1267,15 @@
         lblWrap.innerHTML = `<span class="text-slate-500">Label:</span>`;
         const lblInput = document.createElement('input');
         lblInput.type = 'text';
-        lblInput.value = node.label || '';
-        lblInput.placeholder = node.type === 'INPUT' ? 'a' : (node.type === 'OUTPUT' ? 'r' : 'optional');
+        lblInput.value = ['INPUT', 'OUTPUT'].includes(node.type)
+          ? (node.label || '').toUpperCase()
+          : (node.label || '');
+        lblInput.placeholder = node.type === 'INPUT' ? 'A' : (node.type === 'OUTPUT' ? 'R' : 'optional');
         lblInput.className = 'w-20 px-2 py-0.5 border border-slate-300 rounded text-xs font-serif text-slate-900 focus:outline-none focus:border-blue-500';
         lblInput.addEventListener('input', () => {
-          node.label = lblInput.value;
+          node.label = ['INPUT', 'OUTPUT'].includes(node.type)
+            ? lblInput.value.toUpperCase()
+            : lblInput.value;
           renderAllWithoutInspectorRebuild();
           saveToStorage();
         });
@@ -1535,10 +1539,10 @@
         id: 'circuit_' + Date.now(),
         name: `circuit ${workspace.circuits.length + 1}`,
         nodes: [
-          { id: 'in_1', type: 'INPUT', label: 'a', x: 140, y: 180, inputs: 0 },
-          { id: 'in_2', type: 'INPUT', label: 'b', x: 140, y: 260, inputs: 0 },
+          { id: 'in_1', type: 'INPUT', label: 'A', x: 140, y: 180, inputs: 0 },
+          { id: 'in_2', type: 'INPUT', label: 'B', x: 140, y: 260, inputs: 0 },
           { id: 'g_1',  type: 'AND',   label: '',  x: 340, y: 220, inputs: 2 },
-          { id: 'out_1',type: 'OUTPUT',label: 'r', x: 520, y: 220, inputs: 1 }
+          { id: 'out_1',type: 'OUTPUT',label: 'R', x: 520, y: 220, inputs: 1 }
         ],
         wires: [
           { id: 'w_1', from: 'in_1', to: 'g_1', toPin: 0, midX: 240 },
@@ -2305,9 +2309,12 @@
             delete workspace.showgrid;
             workspace.circuits.forEach(circuit => {
               circuit.nodes.forEach(node => {
-                if (node.label) node.label = node.label.toLowerCase();
+                if (node.label && ['INPUT', 'OUTPUT'].includes(node.type)) {
+                  node.label = node.label.toUpperCase();
+                }
               });
             });
+            saveToStorage();
             loaded = true;
           }
         }

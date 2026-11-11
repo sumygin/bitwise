@@ -229,6 +229,11 @@
 
 html, body { background: #ffffff !important; color: var(--ink) !important; }
 body { text-transform: lowercase; }
+.node-group text,
+#truth-table-content th,
+#selection-inspector input {
+  text-transform: uppercase;
+}
 header.ui-chrome,
 header.ui-chrome > div:first-child,
 header.ui-chrome > div:nth-child(2) {
