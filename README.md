@@ -21,25 +21,6 @@ An interactive digital logic circuit designer and simulator for building, testin
 2. **Propagation Queue:** When an input pin changes state at step $t$, affected downstream nodes are pushed onto an evaluation queue. Cycles (such as SR latches or ring oscillators) are handled using discrete propagation ticks to prevent infinite synchronous loops.
 3. **Rendering Pipeline:** Decouples simulation tick frequency from the `requestAnimationFrame` viewport renderer so complex circuits remain responsive at 60 FPS.
 
-## Getting Started
-
-### Prerequisites
-
-- Node.js (v18+ recommended) or a modern web browser
-
-### Installation
-
-```bash
-# Clone the repository
-git clone https://github.com/sumygin/bitwise.git
-cd bitwise
-
-# Install dependencies
-npm install
-
-# Start the development server
-npm run dev
-```
 
 ## Usage
 
