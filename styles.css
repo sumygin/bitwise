@@ -391,3 +391,5 @@ body.screenshot-mode #db-inspector { display: none !important; }
 #db-quick-menu, #db-quick-menu * { text-transform: none; }
 .db-examples { color: var(--ink); background: transparent; cursor: pointer; }
 .db-examples { width: auto; appearance: none; -webkit-appearance: none; }
+#db-inspector .db-card-row { display: grid; grid-template-columns: 1fr 5.5rem; align-items: center; gap: .4rem; color: #333; }
+#db-inspector .db-card-row span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }

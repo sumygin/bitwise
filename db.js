@@ -688,11 +688,19 @@ const DB = (() => {
         html += `<label class="db-check"><input type="checkbox" data-prop="weak" ${it.weak ? 'checked' : ''}/> weak entity (double box)</label>`;
         html += `<div class="db-row"><button data-act="add-attr">+ attribute</button><button data-act="add-key">+ key attribute</button></div>`;
         html += `<div class="db-row"><button data-act="add-sub">+ subset</button><button data-act="add-rel">+ relationship</button></div>`;
+        html += cardinalityRows(it);
       }
       if (it.type === 'relationship') {
         html += `<label class="db-check"><input type="checkbox" data-prop="identifying" ${it.identifying ? 'checked' : ''}/> identifying (double diamond)</label>`;
         html += `<div class="db-row"><button data-act="add-attr">+ attribute</button></div>`;
         html += `<div class="db-hint">tip: put a line break with "\\n" in the name, or it wraps by itself</div>`;
+        const parts = participantLines(it).filter(p => p.part);
+        if (parts.length === 2) {
+          const [a, b] = parts.map(p => esc(p.other.label || p.other.type));
+          html += `<div class="db-field"><span>constraint (${a} : ${b})</span></div>`;
+          html += `<div class="db-row">${['1:1', '1:N', 'N:1', 'M:N'].map(r => `<button data-ratio="${r}" title="${a} ${r} ${b}">${r}</button>`).join('')}</div>`;
+        }
+        html += cardinalityRows(it);
       }
       if (it.type === 'attribute') {
         html += `<label class="db-check"><input type="checkbox" data-prop="key" ${it.key ? 'checked' : ''}/> key (underlined)</label>`;
@@ -750,6 +758,50 @@ const DB = (() => {
     inspector.innerHTML = html;
   }
 
+  /** Lines from an entity/relationship to the things it is related to. */
+  //   at:   the shape whose participation the cardinality describes
+  //   part: true when `other` is a participant of relationship `it`
+  function participantLines(it) {
+    const map = itemMap();
+    return diagram.links
+      .filter(l => l.from === it.id || l.to === it.id)
+      .map(l => ({ link: l, other: map.get(l.from === it.id ? l.to : l.from) }))
+      .filter(p => p.other && (it.type === 'relationship'
+        ? (p.other.type === 'entity' || p.other.type === 'relationship')
+        : p.other.type === 'relationship'))
+      .map(p => {
+        let part = it.type === 'relationship' && p.other.type === 'entity';
+        if (it.type === 'relationship' && p.other.type === 'relationship') {
+          // nested: the cardinality sits next to the relationship that takes part
+          part = p.link.card
+            ? ((p.link.cardEnd || 'to') === 'to' ? p.link.to : p.link.from) === p.other.id
+            : p.link.from === it.id;
+        }
+        return { ...p, part, at: part ? p.other : it };
+      });
+  }
+
+  /** Look-here cardinality fields for every relationship line of a shape. */
+  function cardinalityRows(it) {
+    const parts = participantLines(it);
+    if (!parts.length) return '';
+    let html = `<div class="db-field"><span>cardinality (look-here)</span></div>`;
+    for (const p of parts) {
+      const who = p.at;
+      const label = p.part ? (p.other.label || p.other.type) : `in ${p.other.label || p.other.type}`;
+      html += `<div class="db-card-row"><span title="how many times each ${esc(who.label || '')} takes part">${esc(label)}</span>`
+        + `<input data-link-card="${p.link.id}" data-at="${who.id}" value="${esc(p.link.card)}" list="db-card-presets" placeholder="none" spellcheck="false" /></div>`;
+    }
+    html += `<datalist id="db-card-presets">${['0:1', '1:1', '0:N', '1:N'].map(c => `<option value="${c}">`).join('')}</datalist>`;
+    return html;
+  }
+
+  /** Sets a line's look-here cardinality at the end touching `atId`. */
+  function setCardAt(link, atId, card) {
+    link.card = card;
+    link.cardEnd = link.to === atId ? 'to' : 'from';
+  }
+
   function onInspectorInput(e) {
     const el = e.target;
     if (!inspectorUndoPushed) { pushUndo(); inspectorUndoPushed = true; }
@@ -758,6 +810,10 @@ const DB = (() => {
       for (const it of diagram.items) if (selItems.has(it.id)) {
         it[el.dataset.prop] = el.dataset.prop === 'label' ? val.replace(/\\n/g, '\n') : val;
       }
+    }
+    if (el.dataset.linkCard) {
+      const link = diagram.links.find(l => l.id === el.dataset.linkCard);
+      if (link) setCardAt(link, el.dataset.at, val.trim().toUpperCase().replace(/^([01]):M$/, '$1:N'));
     }
     if (el.dataset.lprop) {
       for (const l of diagram.links) if (selLinks.has(l.id)) l[el.dataset.lprop] = val;
@@ -791,6 +847,21 @@ const DB = (() => {
     if (btn.dataset.cardAttr !== undefined) {
       pushUndo();
       sel.forEach(i => { i.card = btn.dataset.cardAttr; });
+      commit(true);
+      return;
+    }
+    if (btn.dataset.ratio) {
+      // "A 1:N B": each A relates to many B, each B to at most one A.
+      // Look-here puts the number of times an entity takes part next to it.
+      const parts = participantLines(sel[0]).filter(p => p.part);
+      if (parts.length !== 2) return;
+      pushUndo();
+      const [ra, rb] = btn.dataset.ratio.split(':');
+      const maxFor = (r) => (r === '1' ? '1' : 'N');
+      [[parts[0], rb], [parts[1], ra]].forEach(([p, r]) => {
+        const min = p.link.card ? minOf(p.link.card) : '0';
+        setCardAt(p.link, p.other.id, `${min}:${maxFor(r)}`);
+      });
       commit(true);
       return;
     }
