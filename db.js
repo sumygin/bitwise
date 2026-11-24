@@ -166,6 +166,12 @@ const DB = (() => {
   const ENTITY_FONT = 20;
   const REL_FONT = 19;
   const ATTR_FONT = 18;
+  const GEN_FONT = 16;
+
+  function hexagonPoints(x, y, s, inset = 0) {
+    const hw = s.w / 2 - inset, hh = s.h / 2 - inset, c = s.c;
+    return [[x - hw, y], [x - hw + c, y - hh], [x + hw - c, y - hh], [x + hw, y], [x + hw - c, y + hh], [x - hw + c, y + hh]];
+  }
 
   function wrapLabel(label) {
     if (label.includes('\n')) return label.split('\n');
@@ -270,8 +276,11 @@ const DB = (() => {
       }
       case 'attribute':
         return { kind: 'circle', r: 7, w: 14, h: 14 };
-      case 'gen':
-        return { kind: 'point', w: 6, h: 6 };
+      case 'gen': {
+        if (item.shape === 'dot') return { kind: 'point', w: 6, h: 6 };
+        const w = Math.max(56, textWidth(item.label || '', GEN_FONT) + 40);
+        return { kind: 'hexagon', w, h: 42, c: 15 };
+      }
       case 'table': {
         const L = tableLayout(item);
         return { kind: 'rect', w: L.w, h: L.h, layout: L };
@@ -300,7 +309,7 @@ const DB = (() => {
       const lb = attrLabelBox(item);
       b = { minX: Math.min(b.minX, lb.x), minY: Math.min(b.minY, lb.y), maxX: Math.max(b.maxX, lb.x + lb.w), maxY: Math.max(b.maxY, lb.y + lb.h) };
     }
-    if (item.type === 'gen' && item.label) {
+    if (item.type === 'gen' && item.shape === 'dot' && item.label) {
       const w = textWidth(item.label, 15);
       b = { minX: Math.min(b.minX, x + 10), minY: Math.min(b.minY, y - 12), maxX: Math.max(b.maxX, x + 14 + w), maxY: Math.max(b.maxY, y + 8) };
     }
@@ -342,6 +351,22 @@ const DB = (() => {
       case 'circle':
         t = s.r;
         break;
+      case 'hexagon': {
+        // nearest crossing of the ray with any hexagon edge
+        const pts = hexagonPoints(0, 0, s);
+        t = Infinity;
+        for (let i = 0; i < pts.length; i++) {
+          const [ax, ay] = pts[i], [bx, by] = pts[(i + 1) % pts.length];
+          const ex = bx - ax, ey = by - ay;
+          const den = ux * ey - uy * ex;
+          if (Math.abs(den) < 1e-9) continue;
+          const tt = (ax * ey - ay * ex) / den;
+          const uu = (ax * uy - ay * ux) / den;
+          if (tt > 0 && uu >= -1e-6 && uu <= 1 + 1e-6) t = Math.min(t, tt);
+        }
+        if (!isFinite(t)) t = 0;
+        break;
+      }
       default:
         t = 0;
     }
@@ -496,8 +521,13 @@ const DB = (() => {
         break;
       }
       case 'gen': {
-        g.appendChild(mk('circle', { cx: x, cy: y, r: 3.2, fill: COLORS.ink }));
-        if (item.label) g.appendChild(mkText(item.label, x + 10, y - 4, 15, 'start'));
+        if (item.shape === 'dot') {
+          g.appendChild(mk('circle', { cx: x, cy: y, r: 3.2, fill: COLORS.ink }));
+          if (item.label) g.appendChild(mkText(item.label, x + 10, y - 4, 15, 'start'));
+          break;
+        }
+        g.appendChild(mk('polygon', { points: hexagonPoints(x, y, s).map(p => p.join(',')).join(' '), fill: '#ffffff', stroke: COLORS.ink, 'stroke-width': STROKE, 'stroke-linejoin': 'miter' }));
+        if (item.label) g.appendChild(mkText(item.label, x, y + GEN_FONT * 0.35, GEN_FONT, 'middle'));
         break;
       }
       case 'table': {
@@ -648,8 +678,9 @@ const DB = (() => {
       g.appendChild(buildItemGraphic(item));
       // connect handle
       const { x, y, s } = centreOf(item);
-      const hx = item.type === 'attribute' || item.type === 'gen' ? x : x + s.w / 2;
-      const hy = item.type === 'attribute' || item.type === 'gen' ? y - 16 : y - s.h / 2;
+      const small = item.type === 'attribute' || (item.type === 'gen' && item.shape === 'dot');
+      const hx = small ? x : x + s.w / 2;
+      const hy = small ? y - 16 : y - s.h / 2;
       const handle = mk('g', { class: 'db-handle pin-dot' });
       handle.appendChild(mk('circle', { cx: hx, cy: hy, r: 9, fill: 'transparent' }));
       handle.appendChild(mk('circle', { cx: hx, cy: hy, r: 5.5, fill: COLORS.select, stroke: '#ffffff', 'stroke-width': 1.5 }));
@@ -712,8 +743,10 @@ const DB = (() => {
         html += `<div class="db-row"><button data-act="add-attr">+ sub-attribute</button></div>`;
       }
       if (it.type === 'gen') {
-        html += `<div class="db-hint">join each sub-class to this dot, then join the dot to the super-class (arrow). use the name for constraints such as "disjoint" or "total".</div>`;
-        html += `<div class="db-row">${['', 'disjoint', 'total', 'disjoint, total'].map(c => `<button data-gen-label="${c}">${c || 'none'}</button>`).join('')}</div>`;
+        html += `<div class="db-hint">join each sub-class (subset) to this shape, then join it to the super-class — that line becomes the arrow. the name holds constraints such as "disjoint" or "total".</div>`;
+        html += `<div class="db-row">${['', 'isa', 'disjoint', 'total', 'disjoint, total'].map(c => `<button data-gen-label="${c}">${c || 'none'}</button>`).join('')}</div>`;
+        html += field('shape', `<select data-prop="shape">${[['hexagon', 'hexagon'], ['dot', 'junction dot']].map(([v, t]) => `<option value="${v}" ${((it.shape || 'hexagon') === v) ? 'selected' : ''}>${t}</option>`).join('')}</select>`);
+        html += `<div class="db-row"><button data-act="add-subclass">+ sub-class</button></div>`;
       }
       if (it.type === 'table') {
         html += field('columns', `<input data-prop="columns" value="${esc(it.columns)}" spellcheck="false" />`);
@@ -894,11 +927,26 @@ const DB = (() => {
         break;
       }
       case 'add-sub': {
+        // subset: sub-class -- hexagon --> super-class
         const it = sel[0];
         pushUndo();
-        const sub = { id: uid('e'), type: 'entity', label: 'subset', x: it.x, y: it.y + 140 };
+        const hex = { id: uid('g'), type: 'gen', label: '', x: it.x, y: it.y + 100 };
+        const sub = { id: uid('e'), type: 'entity', label: 'subset', x: it.x, y: it.y + 200 };
+        diagram.items.push(hex, sub);
+        diagram.links.push({ id: uid('l'), from: hex.id, to: it.id, kind: 'isa', route: 'straight' });
+        diagram.links.push({ id: uid('l'), from: sub.id, to: hex.id, kind: 'line', route: 'straight' });
+        selItems = new Set([sub.id]); selLinks.clear();
+        commit(true);
+        focusLabel();
+        break;
+      }
+      case 'add-subclass': {
+        const it = sel[0];
+        pushUndo();
+        const siblings = diagram.links.filter(l => l.to === it.id && l.kind !== 'isa').length;
+        const sub = { id: uid('e'), type: 'entity', label: 'sub-class', x: it.x + (siblings % 2 ? -1 : 1) * 90 * Math.ceil((siblings + 1) / 2) * (siblings ? 1 : 0), y: it.y + 110 };
         diagram.items.push(sub);
-        diagram.links.push({ id: uid('l'), from: sub.id, to: it.id, kind: 'isa', route: 'straight' });
+        diagram.links.push({ id: uid('l'), from: sub.id, to: it.id, kind: 'line', route: siblings ? 'vh' : 'straight' });
         selItems = new Set([sub.id]); selLinks.clear();
         commit(true);
         focusLabel();
@@ -1135,7 +1183,7 @@ const DB = (() => {
         if (!n.other) continue;
         if (n.link.kind === 'isa' && n.outgoing && n.other.type === 'entity') return n.other;
         if (n.other.type === 'gen') {
-          const up = neighbours(n.other.id).find(m => m.other && m.other.type === 'entity' && m.other.id !== e.id && m.link.kind === 'isa' && m.outgoing);
+          const up = neighbours(n.other.id).find(m => m.other && m.other.type === 'entity' && m.other.id !== e.id && m.link.kind === 'isa');
           if (up) return up.other;
         }
       }
@@ -1330,14 +1378,15 @@ const DB = (() => {
       build: () => ({
         items: [
           { id: 'person', type: 'entity', label: 'person', x: 380, y: 120 },
-          { id: 'p_sn', type: 'attribute', label: 'salary_number', key: true, x: 230, y: 70, labelSide: 'left' },
+          { id: 'p_sn', type: 'attribute', label: 'salary_number', key: true, x: 380, y: 30, labelSide: 'right' },
           { id: 'p_name', type: 'attribute', label: 'name', x: 530, y: 70 },
           { id: 'p_phone', type: 'attribute', label: 'phone', card: '0:N', x: 530, y: 170 },
           { id: 'gen', type: 'gen', label: 'disjoint', x: 380, y: 250 },
           { id: 'manager', type: 'entity', label: 'manager', x: 230, y: 360 },
           { id: 'engineer', type: 'entity', label: 'engineer', x: 530, y: 360 },
           { id: 'm_bonus', type: 'attribute', label: 'bonus', optional: true, x: 230, y: 450, labelSide: 'right' },
-          { id: 'contractor', type: 'entity', label: 'contractor', x: 60, y: 120 },
+          { id: 'contractor', type: 'entity', label: 'contractor', x: 20, y: 120 },
+          { id: 'sub', type: 'gen', label: '', x: 160, y: 120 },
           { id: 'branch', type: 'entity', label: 'branch', x: 860, y: 120 },
           { id: 'b_sc', type: 'attribute', label: 'sortcode', key: true, x: 860, y: 30 },
           { id: 'has', type: 'relationship', label: 'has', x: 860, y: 280, identifying: true },
@@ -1352,7 +1401,8 @@ const DB = (() => {
           { id: 'l5', from: 'engineer', to: 'gen', kind: 'line', route: 'vh' },
           { id: 'l6', from: 'gen', to: 'person', kind: 'isa' },
           { id: 'l7', from: 'manager', to: 'm_bonus', kind: 'line' },
-          { id: 'l8', from: 'contractor', to: 'person', kind: 'isa' },
+          { id: 'l8', from: 'contractor', to: 'sub', kind: 'line' },
+          { id: 'l8b', from: 'sub', to: 'person', kind: 'isa' },
           { id: 'l9', from: 'branch', to: 'b_sc', kind: 'line' },
           { id: 'l10', from: 'has', to: 'branch', kind: 'line', card: '0:N', cardEnd: 'to' },
           { id: 'l11', from: 'has', to: 'office', kind: 'line', card: '1:1', cardEnd: 'to' },
