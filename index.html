@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>bitwise — logic circuit workspace</title>
+  <title>bitwise — logic circuit & database diagram workspace</title>
   <meta name="description" content="a simple browser-based logic circuit workspace" />
   <meta name="theme-color" content="#ffffff" />
   <link rel="icon" type="image/png" href="favicon_bitwise.png" />
@@ -28,6 +28,13 @@
           <div class="hidden sm:block">
             <span class="bitwise-wordmark">bitwise by makxyak</span>
           </div>
+        </div>
+
+        <!-- Mode switch: logic circuits vs database diagrams -->
+        <div id="mode-switch" class="flex items-center shrink-0 text-xs font-medium">
+          <button data-mode="circuit" class="mode-btn px-2 py-1" title="Logic circuit tabs">circuits</button>
+          <span class="text-slate-300">/</span>
+          <button data-mode="db" class="mode-btn px-2 py-1" title="Database (ER / relational) diagram tabs">databases</button>
         </div>
 
         <!-- Multi-circuit Tabs -->
@@ -88,7 +95,7 @@
     <!-- Second Row: component Toolbar & Layout Tools -->
     <div class="flex items-center justify-between px-3 py-1.5 bg-white gap-2 flex-wrap">
       <!-- Add Nodes Palette -->
-      <div class="flex items-center gap-1 flex-wrap">
+      <div id="circuit-palette" class="circuit-only flex items-center gap-1 flex-wrap">
         <span class="text-[11px] font-semibold uppercase tracking-wider text-slate-400 mr-1">add:</span>
 
         <button data-add-type="INPUT" class="add-node-btn px-2.5 py-1 text-xs font-medium bg-slate-50 hover:bg-slate-100 text-slate-800 border border-slate-200 rounded-md flex items-center gap-1.5 transition shadow-2xs" title="Add Input Terminal (A, B, C...)">
@@ -140,21 +147,41 @@
         </button>
       </div>
 
+      <!-- Database diagram palette (database mode only) -->
+      <div id="db-toolbar" class="db-only flex items-center gap-1 flex-wrap">
+        <span class="text-[11px] font-semibold uppercase tracking-wider text-slate-400 mr-1">add:</span>
+        <button data-db-add="entity" class="add-node-btn px-2 py-1 text-xs font-medium" title="Entity (E)">entity</button>
+        <button data-db-add="relationship" class="add-node-btn px-2 py-1 text-xs font-medium" title="Relationship (R)">relationship</button>
+        <button data-db-add="attribute" class="add-node-btn px-2 py-1 text-xs font-medium" title="Attribute (A) — adds to the selected entity/relationship">attribute</button>
+        <button data-db-add="key" class="add-node-btn px-2 py-1 text-xs font-medium" title="Key attribute (K)">key attribute</button>
+        <button data-db-add="gen" class="add-node-btn px-2 py-1 text-xs font-medium" title="Generalisation hierarchy junction">generalisation</button>
+        <button data-db-add="table" class="add-node-btn px-2 py-1 text-xs font-medium" title="Relational table (T)">table</button>
+        <button data-db-add="text" class="add-node-btn px-2 py-1 text-xs font-medium" title="Text / schema notation (keys, fk ⇒, RA symbols)">schema text</button>
+        <div class="h-4 w-px bg-slate-200 mx-1"></div>
+        <button id="db-btn-map" class="px-2 py-1 text-xs font-semibold" title="Map the ER diagram to a relational schema">er → relational</button>
+        <select id="db-examples" class="db-examples text-xs px-1 py-1" title="Insert a worked example from the course">
+          <option value="">examples…</option>
+          <option value="nested">nested relationships</option>
+          <option value="eer">eer constructs</option>
+          <option value="bank">bank schema (tables)</option>
+        </select>
+      </div>
+
       <!-- Layout, duplicate, Undo/Redo, Grid Controls -->
       <div class="flex items-center gap-1.5">
-        <button id="btn-auto-layout" title="Clean up the circuit with horizontal-first wiring"
+        <button id="btn-auto-layout" data-circuit-only="1" title="Clean up the circuit with horizontal-first wiring"
           class="px-2.5 py-1 text-xs font-semibold text-blue-700 bg-blue-50 hover:bg-blue-100 border border-blue-200 rounded-md flex items-center gap-1 transition shadow-2xs">
           
           <!--<span>clean circuit</span>-->
         </button>
 
-        <button id="btn-truth-table" title="Generate a truth table for the current circuit"
+        <button id="btn-truth-table" data-circuit-only="1" title="Generate a truth table for the current circuit"
           class="px-2.5 py-1 text-xs font-semibold text-violet-700 bg-violet-50 hover:bg-violet-100 border border-violet-200 rounded-md flex items-center gap-1 transition shadow-2xs">
           
           <span>truth table</span>
         </button>
 
-        <button id="btn-clone-selection" title="duplicate Selected Nodes (or entire circuit onto Canvas if nothing selected) [Ctrl+D]"
+        <button id="btn-clone-selection" data-circuit-only="1" title="duplicate Selected Nodes (or entire circuit onto Canvas if nothing selected) [Ctrl+D]"
           class="px-2.5 py-1 text-xs font-medium text-slate-700 bg-white hover:bg-slate-100 border border-slate-200 rounded-md flex items-center gap-1 transition">
           
           <span id="dup-btn-label">duplicate circuit here</span>
@@ -237,7 +264,7 @@
     </div>
 
     <!-- SVG circuit Canvas -->
-    <svg id="circuit-svg" class="w-full h-full block cursor-default" xmlns="http://www.w3.org/2000/svg">
+    <svg id="circuit-svg" class="circuit-only w-full h-full block cursor-default" xmlns="http://www.w3.org/2000/svg">
       <!-- Pure White Background Rect so exports always have #ffffff -->
       <rect id="svg-bg-rect" width="100%" height="100%" fill="#ffffff" />
 
@@ -255,6 +282,33 @@
         <rect id="marquee-box" class="hidden pointer-events-none" fill="rgba(37, 99, 235, 0.08)" stroke="#2563eb" stroke-width="1" stroke-dasharray="4,3" />
       </g>
     </svg>
+
+    <!-- Database diagram canvas -->
+    <svg id="db-svg" class="db-only w-full h-full block cursor-default absolute inset-0" xmlns="http://www.w3.org/2000/svg">
+      <g id="db-viewport">
+        <g id="db-links"></g>
+        <g id="db-items"></g>
+        <line id="db-temp-line" class="hidden pointer-events-none" stroke="#2563eb" stroke-width="2" stroke-dasharray="5,4" />
+        <rect id="db-marquee" class="hidden pointer-events-none" fill="rgba(37, 99, 235, 0.08)" stroke="#2563eb" stroke-width="1" stroke-dasharray="4,3" />
+      </g>
+    </svg>
+
+    <!-- Database inspector -->
+    <div id="db-inspector" class="ui-chrome db-only absolute top-3 right-3 z-20 w-64 text-xs"></div>
+
+    <!-- Database quick add -->
+    <div id="db-quick-menu" class="ui-chrome hidden absolute z-30 bg-white rounded-xl p-2 w-52">
+      <div class="text-[10px] font-semibold uppercase tracking-wider text-slate-400 px-2 py-1">quick insert at cursor</div>
+      <div class="grid grid-cols-2 gap-1 mt-1">
+        <button data-db-quick="entity" class="px-2 py-1.5 text-xs text-left rounded-lg hover:bg-slate-100">entity</button>
+        <button data-db-quick="relationship" class="px-2 py-1.5 text-xs text-left rounded-lg hover:bg-slate-100">relationship</button>
+        <button data-db-quick="attribute" class="px-2 py-1.5 text-xs text-left rounded-lg hover:bg-slate-100">attribute</button>
+        <button data-db-quick="key" class="px-2 py-1.5 text-xs text-left rounded-lg hover:bg-slate-100">key attribute</button>
+        <button data-db-quick="gen" class="px-2 py-1.5 text-xs text-left rounded-lg hover:bg-slate-100">generalisation</button>
+        <button data-db-quick="table" class="px-2 py-1.5 text-xs text-left rounded-lg hover:bg-slate-100">table</button>
+        <button data-db-quick="text" class="px-2 py-1.5 text-xs text-left rounded-lg hover:bg-slate-100">schema text</button>
+      </div>
+    </div>
 
     <!-- Bottom Helper Status Bar (Hidden in Screenshot Mode) -->
     <div class="ui-chrome absolute bottom-3 left-3 right-3 pointer-events-none flex items-center justify-between text-xs text-slate-500">
@@ -282,5 +336,6 @@
   </div>
 
   <script src="app.js"></script>
+  <script src="db.js"></script>
 </body>
 </html>

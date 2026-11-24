@@ -175,6 +175,49 @@
       return workspace.circuits.find(c => c.id === workspace.activecircuitId) || workspace.circuits[0];
     }
 
+    // Tabs are either logic circuits (default) or database diagrams (kind: 'db').
+    function tabKind(tab) {
+      return tab && tab.kind === 'db' ? 'db' : 'circuit';
+    }
+
+    function isDbActive() {
+      return tabKind(getActivecircuit()) === 'db';
+    }
+
+    function activateTab(id) {
+      workspace.activecircuitId = id;
+      selectedNodeIds.clear();
+      selectedWireIds.clear();
+      undoStack = [];
+      redoStack = [];
+      updateUndoRedoButtons();
+      renderAll();
+      if (!isDbActive()) fitViewToDiagram();
+      saveToStorage();
+    }
+
+    function switchMode(mode) {
+      const current = getActivecircuit();
+      if (tabKind(current) === mode) return;
+      const key = mode === 'db' ? 'lastDbTabId' : 'lastCircuitTabId';
+      const candidate = workspace.circuits.find(c => c.id === workspace[key] && tabKind(c) === mode)
+        || workspace.circuits.find(c => tabKind(c) === mode);
+      if (candidate) {
+        activateTab(candidate.id);
+      } else if (mode === 'db') {
+        createNewDbTab();
+      } else {
+        createNewBlankcircuitTab();
+      }
+    }
+
+    function createNewDbTab() {
+      const count = workspace.circuits.filter(c => tabKind(c) === 'db').length;
+      const tab = DB.newDiagram(`database ${count + 1}`);
+      workspace.circuits.push(tab);
+      activateTab(tab.id);
+    }
+
     function saveToStorage() {
       try {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(workspace));
@@ -197,6 +240,7 @@
     }
 
     function undo() {
+      if (isDbActive()) { DB.undo(); return; }
       if (undoStack.length === 0) return;
       const circuit = getActivecircuit();
       redoStack.push(JSON.stringify({ nodes: circuit.nodes, wires: circuit.wires }));
@@ -211,6 +255,7 @@
     }
 
     function redo() {
+      if (isDbActive()) { DB.redo(); return; }
       if (redoStack.length === 0) return;
       const circuit = getActivecircuit();
       undoStack.push(JSON.stringify({ nodes: circuit.nodes, wires: circuit.wires }));
@@ -971,6 +1016,14 @@
       const circuit = getActivecircuit();
       if (!circuit) return;
 
+      if (tabKind(circuit) === 'db') {
+        workspace.lastDbTabId = circuit.id;
+        DB.show(circuit);
+        return;
+      }
+      workspace.lastCircuitTabId = circuit.id;
+      if (typeof DB !== 'undefined') DB.hide();
+
       const nodeMap = new Map(circuit.nodes.map(n => [n.id, n]));
 
       // Update viewport transform
@@ -1152,8 +1205,15 @@
     function renderTabs() {
       const container = document.getElementById('circuit-tabs');
       container.innerHTML = '';
+      const activeKind = tabKind(getActivecircuit());
+      document.querySelectorAll('#mode-switch .mode-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.mode === activeKind);
+      });
+      document.querySelector('#btn-new-tab span').textContent = activeKind === 'db' ? 'new diagram' : 'new tab';
+      document.querySelector('#btn-dup-tab span').textContent = activeKind === 'db' ? 'duplicate diagram tab' : 'duplicate circuit tab';
 
       for (const c of workspace.circuits) {
+        if (tabKind(c) !== activeKind) continue;
         const isActive = c.id === workspace.activecircuitId;
         const tab = document.createElement('div');
         tab.className = `group flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium cursor-pointer border transition shrink-0 ${
@@ -1184,17 +1244,7 @@
         }
 
         tab.addEventListener('click', () => {
-          if (workspace.activecircuitId !== c.id) {
-            workspace.activecircuitId = c.id;
-            selectedNodeIds.clear();
-            selectedWireIds.clear();
-            undoStack = [];
-            redoStack = [];
-            updateUndoRedoButtons();
-            renderAll();
-            fitViewToDiagram();
-            saveToStorage();
-          }
+          if (workspace.activecircuitId !== c.id) activateTab(c.id);
         });
 
         container.appendChild(tab);
@@ -1208,7 +1258,8 @@
       input.className = 'px-1.5 py-0.5 text-xs border border-blue-400 rounded bg-white text-slate-900 w-32 focus:outline-none';
       const tabsEl = document.getElementById('circuit-tabs');
       renderTabs();
-      const activeTab = tabsEl.children[workspace.circuits.indexOf(circuit)];
+      const visibleTabs = workspace.circuits.filter(c => tabKind(c) === tabKind(circuit));
+      const activeTab = tabsEl.children[visibleTabs.indexOf(circuit)];
       if (!activeTab) return;
       activeTab.innerHTML = '';
       activeTab.appendChild(input);
@@ -1519,7 +1570,7 @@
       if (!current) return;
 
       const copy = JSON.parse(JSON.stringify(current));
-      copy.id = 'circuit_' + Date.now();
+      copy.id = (tabKind(current) === 'db' ? 'db_' : 'circuit_') + Date.now();
       copy.name = current.name + ' (Copy)';
 
       workspace.circuits.push(copy);
@@ -1564,9 +1615,11 @@
 
     function deletecircuitTab(id) {
       if (workspace.circuits.length <= 1) return;
+      const removed = workspace.circuits.find(c => c.id === id);
       workspace.circuits = workspace.circuits.filter(c => c.id !== id);
       if (workspace.activecircuitId === id) {
-        workspace.activecircuitId = workspace.circuits[0].id;
+        const sameKind = workspace.circuits.find(c => tabKind(c) === tabKind(removed));
+        workspace.activecircuitId = (sameKind || workspace.circuits[0]).id;
       }
       renderAll();
       saveToStorage();
@@ -1924,6 +1977,7 @@
     }, { passive: false });
 
     function zoomAroundPoint(factor, clientX, clientY) {
+      if (isDbActive()) { DB.zoomCentre(factor); return; }
       const rect = svgEl.getBoundingClientRect();
       const mx = clientX - rect.left;
       const my = clientY - rect.top;
@@ -1938,6 +1992,7 @@
     }
 
     function fitViewToDiagram() {
+      if (isDbActive()) { DB.fitView(); return; }
       const circuit = getActivecircuit();
       if (!circuit || circuit.nodes.length === 0) {
         view = { x: 0, y: 0, scale: 1 };
@@ -1969,7 +2024,8 @@
 
     // Keyboard Shortcuts
     window.addEventListener('keydown', (e) => {
-      if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT') return;
+      if (isDbActive()) return; // database mode handles its own shortcuts (db.js)
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT' || e.target.tagName === 'TEXTAREA') return;
 
       if (e.code === 'Space') {
         interaction.spacePressed = true;
@@ -2027,6 +2083,7 @@
     function toggleScreenshotMode(enable) {
       const exitBar = document.getElementById('screenshot-exit-bar');
       if (enable) {
+        if (isDbActive()) DB.clearSelection();
         selectedNodeIds.clear();
         selectedWireIds.clear();
         interaction.wireSource = null;
@@ -2045,6 +2102,7 @@
      * and downloads it immediately.
      */
     function exportHighResPNG() {
+      if (isDbActive()) { DB.exportPNG(); return; }
       const circuit = getActivecircuit();
       if (!circuit || circuit.nodes.length === 0) {
         showToast('Canvas is empty');
@@ -2176,6 +2234,11 @@
           const parsed = JSON.parse(e.target.result);
           if (parsed && Array.isArray(parsed.circuits) && parsed.circuits.length > 0) {
             workspace = parsed;
+            workspace.circuits.forEach(c => { c.nodes = c.nodes || []; c.wires = c.wires || []; });
+          } else if (parsed && parsed.kind === 'db' && Array.isArray(parsed.items)) {
+            const imported = { ...parsed, id: 'db_' + Date.now(), nodes: [], wires: [], links: parsed.links || [] };
+            workspace.circuits.push(imported);
+            workspace.activecircuitId = imported.id;
           } else if (parsed && Array.isArray(parsed.nodes) && Array.isArray(parsed.wires)) {
             // Single circuit JSON format
             const imported = {
@@ -2206,7 +2269,7 @@
     /*************************************************************************
      * 11. WIRE UP TOOLBAR BUTTONS & INITIALIZATION
      *************************************************************************/
-    document.querySelectorAll('.add-node-btn').forEach(btn => {
+    document.querySelectorAll('.add-node-btn[data-add-type]').forEach(btn => {
       btn.addEventListener('click', () => {
         addNode(btn.dataset.addType);
       });
@@ -2229,7 +2292,13 @@
     });
     document.getElementById('btn-clone-selection').addEventListener('click', duplicateselectionOrcircuitonCanvas);
     document.getElementById('btn-dup-tab').addEventListener('click', duplicatecircuitToNewTab);
-    document.getElementById('btn-new-tab').addEventListener('click', createNewBlankcircuitTab);
+    document.getElementById('btn-new-tab').addEventListener('click', () => {
+      if (isDbActive()) createNewDbTab();
+      else createNewBlankcircuitTab();
+    });
+    document.querySelectorAll('#mode-switch .mode-btn').forEach(btn => {
+      btn.addEventListener('click', () => switchMode(btn.dataset.mode));
+    });
 
     document.getElementById('btn-undo').addEventListener('click', undo);
     document.getElementById('btn-redo').addEventListener('click', redo);
@@ -2244,6 +2313,7 @@
     document.getElementById('btn-fit-view').addEventListener('click', fitViewToDiagram);
 
     document.getElementById('btn-clear').addEventListener('click', () => {
+      if (isDbActive()) { DB.clearAll(); return; }
       const circuit = getActivecircuit();
       if (!circuit || circuit.nodes.length === 0) return;
       pushUndoState();
@@ -2257,6 +2327,7 @@
     });
 
     document.getElementById('btn-load-ref').addEventListener('click', () => {
+      if (isDbActive()) { DB.loadExample('nested'); return; }
       const ref = createreferencecircuit();
       workspace.circuits.push(ref);
       workspace.activecircuitId = ref.id;
@@ -2298,6 +2369,7 @@
 
     // Initialize Application
     function initApp() {
+      DB.init();
       let loaded = false;
       try {
         const saved = localStorage.getItem(STORAGE_KEY);
@@ -2308,6 +2380,8 @@
             workspace.showGrid = !!(workspace.showGrid ?? workspace.showgrid);
             delete workspace.showgrid;
             workspace.circuits.forEach(circuit => {
+              circuit.nodes = circuit.nodes || [];
+              circuit.wires = circuit.wires || [];
               circuit.nodes.forEach(node => {
                 if (node.label && ['INPUT', 'OUTPUT'].includes(node.type)) {
                   node.label = node.label.toUpperCase();
